@@ -5,91 +5,95 @@ import TaskFilters from "../tasks/TaskFilters";
 import API from "../../utils/api";
 import NotificationBar from "../../components/NotificationBar";
 
-const TaskCard = ({ task, handleViewTask, handleEditTask, handleDeleteTask, isAdmin }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const toggleExpand = () => setIsExpanded(!isExpanded);
-
-  // Shortened description
-  const shortenedDescription = task.description.slice(0, 100); // Show first 100 characters
-  return (
-    <div className="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition-all duration-300 w-full">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-4">
+const TaskCard = ({ task, handleViewTask, handleEditTask, handleDeleteTask, isAdmin,}) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const toggleExpand = () => setIsExpanded(!isExpanded);
+  
+    const shortenedDescription = task.description.slice(0, 100); // Show first 100 characters
+  
+    const priorityColor = task.priority === "High"
+      ? "bg-red-100 border-red-600 text-red-600"
+      : task.priority === "Medium"
+      ? "bg-yellow-100 border-yellow-600 text-yellow-600"
+      : "bg-green-100 border-green-600 text-green-600";
+  
+    return (
+      <div className={`rounded-xl shadow-md p-6 hover:shadow-xl transition-all duration-300 w-full ${priorityColor}`}>
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-4">
+            <div>
+              <h3 className="text-2xl font-bold text-gray-800">{task.title}</h3>
+              <p className="text-sm text-gray-600">
+                {isExpanded ? task.description : shortenedDescription}
+                {task.description.length > 100 && (
+                  <button
+                    onClick={toggleExpand}
+                    className="text-indigo-600 font-medium ml-1"
+                  >
+                    {isExpanded ? "Show Less" : "...Show More"}
+                  </button>
+                )}
+              </p>
+            </div>
+          </div>
+        </div>
+  
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm text-gray-700 mt-6">
           <div>
-            <h3 className="text-2xl font-bold text-gray-800">{task.title}</h3>
-            <p className="text-sm text-gray-600">
-              {isExpanded ? task.description : shortenedDescription}
-              {task.description.length > 100 && (
-                <button
-                  onClick={toggleExpand}
-                  className="text-indigo-600 font-medium ml-1"
-                >
-                  {isExpanded ? "Show Less" : "...Show More"}
-                </button>
-              )}
-            </p>
+            <span className="font-semibold">Due Date:</span>{" "}
+            {new Date(task.dueDate).toLocaleDateString()}
           </div>
+          <div>
+            <span className="font-semibold">Priority:</span>{" "}
+            <span
+              className={`${
+                task.priority === "High"
+                  ? "text-red-600"
+                  : task.priority === "Medium"
+                  ? "text-yellow-600"
+                  : "text-green-600"
+              } font-medium`}
+            >
+              {task.priority}
+            </span>
+          </div>
+          <div>
+            <span className="font-semibold">Status:</span> {task.status}
+          </div>
+          {task.assignedTo && (
+            <div className="col-span-2">
+              <span className="font-semibold">Assigned To:</span>{" "}
+              {task.assignedTo.name}
+            </div>
+          )}
         </div>
-      </div>
-
-      {/* Metadata Section */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm text-gray-700 mt-6">
-        <div>
-          <span className="font-semibold">Due Date:</span>{" "}
-          {new Date(task.dueDate).toLocaleDateString()}
-        </div>
-        <div>
-          <span className="font-semibold">Priority:</span>{" "}
-          <span
-            className={`${
-              task.priority === "High"
-                ? "text-red-600"
-                : task.priority === "Medium"
-                ? "text-yellow-600"
-                : "text-green-600"
-            } font-medium`}
+  
+        <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-500">
+          <button
+            onClick={() => handleViewTask(task)}
+            className="text-indigo-600 border border-indigo-600 hover:bg-indigo-50 text-sm px-4 py-1.5 rounded-full transition"
           >
-            {task.priority}
-          </span>
+            View
+          </button>
+          <button
+            onClick={() => handleEditTask(task._id)}
+            className="text-blue-600 border border-blue-600 hover:bg-blue-50 text-sm px-4 py-1.5 rounded-full transition"
+          >
+            Edit
+          </button>
+          {isAdmin && (
+          <button
+            onClick={() => handleDeleteTask(task._id)}
+            className="text-red-600 border border-red-600 hover:bg-red-50 text-sm px-4 py-1.5 rounded-full transition"
+          >
+            Delete
+          </button>
+          )}
         </div>
-        <div>
-          <span className="font-semibold">Status:</span> {task.status}
-        </div>
-        {task.assignedTo && (
-          <div className="col-span-2">
-            <span className="font-semibold">Assigned To:</span>{" "}
-            {task.assignedTo.name}
-          </div>
-        )}
       </div>
-
-      {/* Action Buttons */}
-      <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
-        <button
-          onClick={() => handleViewTask(task)}
-          className="text-indigo-600 border border-indigo-600 hover:bg-indigo-50 text-sm px-4 py-1.5 rounded-full transition"
-        >
-          View
-        </button>
-        <button
-          onClick={() => handleEditTask(task._id)}
-          className="text-blue-600 border border-blue-600 hover:bg-blue-50 text-sm px-4 py-1.5 rounded-full transition"
-        >
-          Edit
-        </button>
-        {isAdmin && (
-        <button
-          onClick={() => handleDeleteTask(task._id)}
-          className="text-red-600 border border-red-600 hover:bg-red-50 text-sm px-4 py-1.5 rounded-full transition"
-        >
-          Delete
-        </button>
-        )}
-      </div>
-    </div>
-  );
-};
+    );
+  };
+  
 
 export default function DashboardPage() {
   const [data, setData] = useState({
@@ -136,12 +140,23 @@ export default function DashboardPage() {
   const fetchDashboard = async () => {
     try {
       const res = await API.get("/tasks/dashboard");
-      setData(res.data);
+      
+      // Sorting the tasks based on dueDate in ascending order
+      const sortedCreatedTasks = res.data.createdTasks.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+      const sortedAssignedTasks = res.data.assignedTasks.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+      const sortedOverdueTasks = res.data.overdueTasks.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+  
+      setData({
+        createdTasks: sortedCreatedTasks,
+        assignedTasks: sortedAssignedTasks,
+        overdueTasks: sortedOverdueTasks,
+      });
     } catch (err) {
       setError("Failed to fetch dashboard data.");
       console.error("Dashboard error", err);
     }
   };
+  
 
   const fetchUserProfile = async () => {
     try {
@@ -320,12 +335,12 @@ export default function DashboardPage() {
 
       {/* Create Task Button */}
       <div className="flex justify-end mb-6">
-        <button
+      {profile?.role !== 'user' || profile?.role !== '' && <button
           onClick={handleCreateTask}
           className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-3 rounded-lg shadow-md transition duration-200"
         >
           + Create Task
-        </button>
+        </button>}
       </div>
 
       {/* Dashboard Heading */}
