@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/api", // or your deployed backend
+  baseURL: "https://task-manager-vdtv.onrender.com/api", // or your deployed backend
 });
 
 API.interceptors.request.use((config) => {
