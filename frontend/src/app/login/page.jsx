@@ -29,7 +29,8 @@ export default function LoginPage() {
 
     try {
       const res = await API.post("/auth/login", form);
-      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("accessToken", res.data.accessToken);
+      localStorage.setItem("refreshToken", res.data.refreshToken);
       router.push("/dashboard");
     } catch (err) {
       setError(err.response?.data?.msg || "Login failed");

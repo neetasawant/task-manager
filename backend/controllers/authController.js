@@ -26,12 +26,22 @@ exports.login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ msg: 'Invalid credentials' });
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '7d',
-    });
+    // Generate JWT (Access Token)
+    const accessToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
+    // Generate Refresh Token (optional)
+    const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET_REFRESH, { expiresIn: '7d' });
+
+    // Send tokens and user info in response
+    res.json({
+      accessToken,
+      refreshToken,
+      user: { id: user._id, name: user.name, email: user.email }
+    });
   } catch (err) {
+    console.error("Error logging in:", err);
     res.status(500).json({ msg: 'Server error' });
   }
 };
+
+

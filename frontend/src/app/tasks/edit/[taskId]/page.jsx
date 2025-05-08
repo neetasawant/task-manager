@@ -1,10 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import API from "../../../utils/api";
 import { useRouter } from "next/navigation";
+import { use } from "react";
+import API from "../../../../utils/api";
 
-export default function TaskCreatePage() {
+export default function TaskEditPage({ params: paramsPromise }) {
+  const params = use(paramsPromise);
+  const { taskId } = params;
+
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -13,22 +17,40 @@ export default function TaskCreatePage() {
     status: "Pending",
     assignedTo: "",
   });
-  const [error, setError] = useState(null);
   const [users, setUsers] = useState([]);
+  const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchData = async () => {
       try {
-        const res = await API.get("/auth/users");
-        setUsers(res.data);
+        const token = localStorage.getItem("accessToken");
+        console.log(taskId);
+        const [taskRes, usersRes] = await Promise.all([
+          API.get(`/tasks/tasks/${taskId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          API.get("/auth/users"),
+        ]);
+
+        setForm({
+          title: taskRes.data.title,
+          description: taskRes.data.description,
+          dueDate: taskRes.data.dueDate?.slice(0, 10) || "",
+          priority: taskRes.data.priority,
+          status: taskRes.data.status,
+          assignedTo: taskRes.data.assignedTo?._id || "",
+        });
+        setUsers(usersRes.data);
       } catch (err) {
-        console.error("Failed to fetch users", err);
+        console.error("Failed to fetch data", err);
+        setError("Failed to load task data.");
       }
     };
-    fetchUsers();
-  }, []);
+
+    if (taskId) fetchData();
+  }, [taskId]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -53,7 +75,7 @@ export default function TaskCreatePage() {
 
     const due = new Date(form.dueDate);
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Remove time part
+    today.setHours(0, 0, 0, 0); // Normalize today's date
 
     if (due < today) {
       setError("Due date cannot be in the past.");
@@ -69,24 +91,27 @@ export default function TaskCreatePage() {
 
     try {
       const token = localStorage.getItem("accessToken");
-      await API.post("/tasks/tasks", form, {
+      await API.put(`/tasks/tasks/${taskId}`, form, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
       router.push("/dashboard");
     } catch (err) {
-      console.error("Create Task Error:", err);
-      setError(err.response?.data?.msg || "Error creating task");
+      console.error(err);
+      setError(err.response?.data?.msg || "Error updating task");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  if (!form.title && !error)
+    return <div className="text-center mt-10">Loading...</div>;
+
   return (
     <div className="max-w-2xl mx-auto mt-20 bg-white border border-gray-300 rounded-lg shadow-md p-10">
       <h2 className="text-3xl font-semibold text-gray-900 mb-8 text-center">
-        Create a New Task
+        Edit Task
       </h2>
 
       {error && (
@@ -104,7 +129,7 @@ export default function TaskCreatePage() {
           <input
             name="title"
             type="text"
-            placeholder="Enter task title"
+            value={form.title}
             onChange={handleChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
             required
@@ -118,9 +143,9 @@ export default function TaskCreatePage() {
           </label>
           <textarea
             name="description"
-            placeholder="Brief description of the task"
-            rows="4"
+            value={form.description}
             onChange={handleChange}
+            rows="4"
             className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm resize-none"
             required
           />
@@ -134,7 +159,7 @@ export default function TaskCreatePage() {
           <input
             name="dueDate"
             type="date"
-            min={new Date().toISOString().split("T")[0]}
+            value={form.dueDate?.substring(0, 10)} // trim timestamp
             onChange={handleChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
             required
@@ -149,6 +174,7 @@ export default function TaskCreatePage() {
             </label>
             <select
               name="priority"
+              value={form.priority}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
             >
@@ -163,6 +189,7 @@ export default function TaskCreatePage() {
             </label>
             <select
               name="status"
+              value={form.status}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
             >
@@ -180,6 +207,7 @@ export default function TaskCreatePage() {
           </label>
           <select
             name="assignedTo"
+            value={form.assignedTo}
             onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
           >
@@ -194,16 +222,15 @@ export default function TaskCreatePage() {
 
         {/* Submit Button */}
         <button
-          disabled={isSubmitting}
           type="submit"
-          className={`w-full text-white font-semibold py-2.5 rounded-md shadow-sm transition-colors duration-200
-    ${
-      isSubmitting
-        ? "bg-blue-400 cursor-not-allowed"
-        : "bg-blue-600 hover:bg-blue-700"
-    }`}
+          disabled={isSubmitting}
+          className={`w-full text-white font-semibold py-2.5 rounded-md shadow-sm transition-colors duration-200 ${
+            isSubmitting
+              ? "bg-blue-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
+          }`}
         >
-          {isSubmitting ? "Creating..." : "Create Task"}
+          {isSubmitting ? "Updating..." : "Update Task"}
         </button>
       </form>
     </div>
