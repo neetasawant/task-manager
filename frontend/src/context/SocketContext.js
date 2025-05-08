@@ -9,7 +9,7 @@ export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const socketInstance = io('http://localhost:5000');
+    const socketInstance = io('https://task-manager-1-7voe.onrender.com');
   
     socketInstance.on('connect', () => {
       console.log('Connected to Socket:', socketInstance.id);
