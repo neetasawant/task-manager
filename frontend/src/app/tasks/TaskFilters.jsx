@@ -7,7 +7,7 @@ export default function TaskFilters({ onFilter }) {
     status: "",
     priority: "",
     search: "",
-    dueDate: "", // 👈 Add dueDate to state
+    dueDate: "", 
   });
 
   const handleChange = (e) => {
@@ -21,7 +21,6 @@ export default function TaskFilters({ onFilter }) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-wrap gap-4 mb-6">
-      {/* Status Filter */}
       <select
         name="status"
         value={filters.status}
@@ -34,7 +33,6 @@ export default function TaskFilters({ onFilter }) {
         <option value="Completed">Completed</option>
       </select>
 
-      {/* Priority Filter */}
       <select
         name="priority"
         value={filters.priority}
@@ -47,7 +45,6 @@ export default function TaskFilters({ onFilter }) {
         <option value="High">High</option>
       </select>
 
-      {/* Due Date Filter */}
       <input
         type="date"
         name="dueDate"
@@ -56,7 +53,6 @@ export default function TaskFilters({ onFilter }) {
         className="border px-3 py-2 rounded-md"
       />
 
-      {/* Search Input */}
       <input
         type="text"
         name="search"
@@ -66,7 +62,6 @@ export default function TaskFilters({ onFilter }) {
         className="border px-3 py-2 rounded-md flex-grow"
       />
 
-      {/* Submit Button */}
       <button
         type="submit"
         className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"

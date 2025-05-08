@@ -60,7 +60,6 @@ export default function TaskEditPage({ params: paramsPromise }) {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Basic client-side validation
     if (!form.title.trim() || !form.description.trim()) {
       setError("Title and Description are required.");
       setIsSubmitting(false);
@@ -75,7 +74,7 @@ export default function TaskEditPage({ params: paramsPromise }) {
 
     const due = new Date(form.dueDate);
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Normalize today's date
+    today.setHours(0, 0, 0, 0);
 
     if (due < today) {
       setError("Due date cannot be in the past.");
@@ -121,7 +120,6 @@ export default function TaskEditPage({ params: paramsPromise }) {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Title */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">
             Title
@@ -135,8 +133,6 @@ export default function TaskEditPage({ params: paramsPromise }) {
             required
           />
         </div>
-
-        {/* Description */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">
             Description
@@ -150,8 +146,6 @@ export default function TaskEditPage({ params: paramsPromise }) {
             required
           />
         </div>
-
-        {/* Due Date */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">
             Due Date
@@ -165,8 +159,6 @@ export default function TaskEditPage({ params: paramsPromise }) {
             required
           />
         </div>
-
-        {/* Priority & Status */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
@@ -199,8 +191,6 @@ export default function TaskEditPage({ params: paramsPromise }) {
             </select>
           </div>
         </div>
-
-        {/* Assign to user */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">
             Assign To
@@ -219,8 +209,6 @@ export default function TaskEditPage({ params: paramsPromise }) {
             ))}
           </select>
         </div>
-
-        {/* Submit Button */}
         <button
           type="submit"
           disabled={isSubmitting}

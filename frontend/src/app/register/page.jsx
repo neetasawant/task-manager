@@ -10,7 +10,7 @@ export default function RegisterPage() {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "user",  // Default role is "user"
+    role: "user", 
   });
   const [error, setError] = useState("");
   const router = useRouter();
@@ -52,12 +52,16 @@ export default function RegisterPage() {
     }
 
     try {
-      // Send the role along with the other user data
-      const res = await API.post("/auth/register", { name, email, password, role });
+      const res = await API.post("/auth/register", {
+        name,
+        email,
+        password,
+        role,
+      });
       alert("Registration successful! Please login.");
       router.push("/login");
     } catch (err) {
-      console.log(err.response?.data?.msg)
+      console.log(err.response?.data?.msg);
       setError(err.response?.data?.msg || "Registration failed");
     }
   };
@@ -103,8 +107,6 @@ export default function RegisterPage() {
             className="w-full p-2 border rounded"
             required
           />
-          
-          {/* Role Selection */}
           <select
             name="role"
             onChange={handleChange}

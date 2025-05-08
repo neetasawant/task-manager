@@ -1,8 +1,8 @@
-const http = require('http');
-const socketIo = require('socket.io');
-const app = require('./app');
-const connectDB = require('./config/db');
-require('dotenv').config();
+const http = require("http");
+const socketIo = require("socket.io");
+const app = require("./app");
+const connectDB = require("./config/db");
+require("dotenv").config();
 
 const PORT = process.env.PORT || 5000;
 
@@ -15,25 +15,24 @@ const server = http.createServer(app);
 // Setup Socket.io
 const io = socketIo(server, {
   cors: {
-    origin: 'http://localhost:3000', // 🔄 Frontend URL
-    methods: ['GET', 'POST'],
+    origin: "http://localhost:3000", // 🔄 Frontend URL
+    methods: ["GET", "POST"],
   },
 });
 
 // Handle socket connection
-app.set('io',io)
-io.on('connection', (socket) => {
-  console.log('New client connected:', socket.id);
+app.set("io", io);
+io.on("connection", (socket) => {
+  console.log("New client connected:", socket.id);
 
-  socket.on('connect', () => {
-    console.log('Socket connected:', socket.id);
+  socket.on("connect", () => {
+    console.log("Socket connected:", socket.id);
   });
-  socket.on('connect_error', (err) => {
-    console.error('Socket connection error:', err);
+  socket.on("connect_error", (err) => {
+    console.error("Socket connection error:", err);
   });
 });
 
-// Export io instance if you want to emit from routes/controllers
 module.exports.io = io;
 
 // Start server

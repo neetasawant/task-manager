@@ -21,7 +21,7 @@ exports.createTask = async (req, res) => {
       dueDate,
       priority,
       status,
-      createdBy: req.user.id, // Assuming auth middleware sets this
+      createdBy: req.user.id,
       assignedTo: assignedTo || null,
     });
 

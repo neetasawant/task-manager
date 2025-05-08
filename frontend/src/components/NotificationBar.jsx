@@ -10,13 +10,13 @@ export default function NotificationBar() {
     if (!socket) return;
   console.log(socket)
     socket.on('connect', () => {
-      console.log('Connected to Socket:', socket.id); // This is working
+      console.log('Connected to Socket:', socket.id); 
     });
   
     socket.on('notification', (data) => {
-      console.log('Notification received:', data); // This should show when you emit data
+      console.log('Notification received:', data); 
       if (data.message) {
-        setMessage(data.message); // Ensure message is set
+        setMessage(data.message);
       }
     });
   

@@ -38,7 +38,6 @@ export default function TaskCreatePage() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Basic client-side validation
     if (!form.title.trim() || !form.description.trim()) {
       setError("Title and Description are required.");
       setIsSubmitting(false);
@@ -53,7 +52,7 @@ export default function TaskCreatePage() {
 
     const due = new Date(form.dueDate);
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Remove time part
+    today.setHours(0, 0, 0, 0); 
 
     if (due < today) {
       setError("Due date cannot be in the past.");
@@ -96,7 +95,6 @@ export default function TaskCreatePage() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Title */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">
             Title
@@ -111,7 +109,6 @@ export default function TaskCreatePage() {
           />
         </div>
 
-        {/* Description */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">
             Description
@@ -126,7 +123,6 @@ export default function TaskCreatePage() {
           />
         </div>
 
-        {/* Due Date */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">
             Due Date
@@ -141,7 +137,6 @@ export default function TaskCreatePage() {
           />
         </div>
 
-        {/* Priority & Status */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">
@@ -173,7 +168,6 @@ export default function TaskCreatePage() {
           </div>
         </div>
 
-        {/* Assign to user */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">
             Assign To
@@ -192,7 +186,6 @@ export default function TaskCreatePage() {
           </select>
         </div>
 
-        {/* Submit Button */}
         <button
           disabled={isSubmitting}
           type="submit"
