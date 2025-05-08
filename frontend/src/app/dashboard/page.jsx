@@ -1,26 +1,31 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import TaskFilters from "../tasks/TaskFilters";
 import API from "../../utils/api";
 
 const TaskCard = ({ task, handleViewTask, handleEditTask, handleDeleteTask }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
-    const toggleExpand = () => setIsExpanded(!isExpanded);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const toggleExpand = () => setIsExpanded(!isExpanded);
 
   // Shortened description
-  const shortenedDescription = task.description.slice(0, 100); // Show first 200 characters
+  const shortenedDescription = task.description.slice(0, 100); // Show first 100 characters
   return (
     <div className="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition-all duration-300 w-full">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-4">
-          
           <div>
             <h3 className="text-2xl font-bold text-gray-800">{task.title}</h3>
             <p className="text-sm text-gray-600">
               {isExpanded ? task.description : shortenedDescription}
               {task.description.length > 100 && (
-                '...'
+                <button
+                  onClick={toggleExpand}
+                  className="text-indigo-600 font-medium ml-1"
+                >
+                  {isExpanded ? "Show Less" : "...Show More"}
+                </button>
               )}
             </p>
           </div>
@@ -83,24 +88,26 @@ const TaskCard = ({ task, handleViewTask, handleEditTask, handleDeleteTask }) =>
   );
 };
 
-
-
 export default function DashboardPage() {
   const [data, setData] = useState({
     createdTasks: [],
     assignedTasks: [],
     overdueTasks: [],
   });
+  const [filter, setFilter] = useState({
+    priority: "",
+    status: "",
+    dueDate: "",
+  });
   const [profile, setProfile] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null); // New error state
+  const [error, setError] = useState(null);
   const router = useRouter();
   const [selectedTask, setSelectedTask] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
   const handleViewTask = (task) => {
-    console.log(task)
     setSelectedTask(task);
     setShowModal(true);
   };
@@ -159,21 +166,18 @@ export default function DashboardPage() {
     router.push(`/tasks/edit/${taskId}`);
   };
 
-  
-
   const handleDeleteTask = async (taskId) => {
     const confirmDelete = window.confirm("Are you sure you want to delete this task?");
     if (confirmDelete) {
       try {
-        await API.delete(`/tasks/tasks/${taskId}`); // Delete the task
-        fetchDashboard(); // Refresh the task data after deletion
+        await API.delete(`/tasks/tasks/${taskId}`);
+        fetchDashboard();
       } catch (err) {
         setError("Failed to delete task.");
         console.error("Delete error", err);
       }
     }
   };
-  
 
   const Section = ({ title, tasks }) => (
     <div className="bg-white p-6 rounded-lg shadow-lg mb-8">
@@ -222,43 +226,73 @@ export default function DashboardPage() {
       </div>
     );
   }
+  const filterTasks = (tasks) => {
+  return tasks.filter((task) => {
+    const matchesPriority =
+      !filter.priority || task.priority === filter.priority;
+    const matchesStatus =
+      !filter.status || task.status === filter.status;
+    const matchesDueDate =
+      !filter.dueDate ||
+      new Date(task.dueDate).toLocaleDateString() ===
+        new Date(filter.dueDate).toLocaleDateString();
 
+    const search = filter.search?.toLowerCase() || "";
+
+    const matchesSearch =
+      !search ||
+      task.title?.toLowerCase().includes(search) ||
+      task.description?.toLowerCase().includes(search);
+
+    return (
+      matchesPriority &&
+      matchesStatus &&
+      matchesDueDate &&
+      matchesSearch
+    );
+  });
+};
+
+
+  // Filtered tasks
+  const filteredCreatedTasks = filterTasks(data.createdTasks);
+  const filteredAssignedTasks = filterTasks(data.assignedTasks);
+  const filteredOverdueTasks = filterTasks(data.overdueTasks);
   return (
     <div className="max-w mx-auto px-6 py-10 bg-gray-50">
-        {showModal && selectedTask && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={closeModal}>
-    <div className="bg-white w-full max-w-3xl p-6 rounded-lg shadow-lg relative">
-      <button
-        onClick={closeModal}
-        className="absolute top-2 right-3 text-gray-500 hover:text-gray-800 text-xl"
-      >
-        &times;
-      </button>
-      <h2 className="text-2xl font-bold mb-4">{selectedTask.title}</h2>
-      <p className="mb-2 text-gray-700">{selectedTask.description}</p>
-      <div className="text-sm text-gray-600 space-y-1">
-        <p><strong>Due Date:</strong> {new Date(selectedTask.dueDate).toLocaleDateString()}</p>
-        <p><strong>Status:</strong> {selectedTask.status}</p>
-        <p>
-          <strong>Priority:</strong>{" "}
-          <span className={`${
-            selectedTask.priority === "High"
-              ? "text-red-600"
-              : selectedTask.priority === "Medium"
-              ? "text-yellow-600"
-              : "text-green-600"
-          }`}>
-            {selectedTask.priority}
-          </span>
-        </p>
-        {selectedTask.assignedTo && (
-          <p><strong>Assigned To:</strong> {selectedTask.assignedTo.name}</p>
-        )}
-      </div>
-    </div>
-  </div>
-)}
-
+      {showModal && selectedTask && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={closeModal}>
+          <div className="bg-white w-full max-w-3xl p-6 rounded-lg shadow-lg relative">
+            <button
+              onClick={closeModal}
+              className="absolute top-2 right-3 text-gray-500 hover:text-gray-800 text-xl"
+            >
+              &times;
+            </button>
+            <h2 className="text-2xl font-bold mb-4">{selectedTask.title}</h2>
+            <p className="mb-2 text-gray-700">{selectedTask.description}</p>
+            <div className="text-sm text-gray-600 space-y-1">
+              <p><strong>Due Date:</strong> {new Date(selectedTask.dueDate).toLocaleDateString()}</p>
+              <p><strong>Status:</strong> {selectedTask.status}</p>
+              <p>
+                <strong>Priority:</strong>{" "}
+                <span className={`${
+                  selectedTask.priority === "High"
+                    ? "text-red-600"
+                    : selectedTask.priority === "Medium"
+                    ? "text-yellow-600"
+                    : "text-green-600"
+                }`}>
+                  {selectedTask.priority}
+                </span>
+              </p>
+              {selectedTask.assignedTo && (
+                <p><strong>Assigned To:</strong> {selectedTask.assignedTo.name}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Profile Section */}
       {profile && (
@@ -299,17 +333,17 @@ export default function DashboardPage() {
           <p>{error}</p>
         </div>
       )}
-
+ <TaskFilters filter={filter} onFilter={setFilter} />
       {/* Task Sections */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         <div>
-          <Section title="Tasks Created by You" tasks={data.createdTasks} />
+          <Section title="Tasks Created by You" tasks={filteredCreatedTasks} />
         </div>
         <div>
-          <Section title="Tasks Assigned to You" tasks={data.assignedTasks} />
+          <Section title="Tasks Assigned to You" tasks={filteredAssignedTasks} />
         </div>
         <div>
-          <Section title="Overdue Tasks" tasks={data.overdueTasks} />
+          <Section title="Overdue Tasks" tasks={filteredOverdueTasks} />
         </div>
       </div>
     </div>

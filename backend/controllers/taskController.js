@@ -35,10 +35,38 @@ exports.createTask = async (req, res) => {
 // Get all tasks
 exports.getAllTasks = async (req, res) => {
   try {
-    const { status, search } = req.query;
+    const { status, search, priority, dueDate, assignedTo } = req.query;
     const query = {};
 
-    if (status) query.status = status;
+    // Filtering by status
+    if (status) {
+      query.status = status;
+    }
+
+    // Filtering by priority
+    if (priority) {
+      query.priority = priority;
+    }
+
+    // Filtering by assigned user
+    if (assignedTo) {
+      query.assignedTo = assignedTo;
+    }
+
+    // Filtering by due date
+    if (dueDate) {
+      const date = new Date(dueDate);
+      date.setHours(0, 0, 0, 0);
+      const nextDate = new Date(date);
+      nextDate.setDate(nextDate.getDate() + 1);
+
+      query.dueDate = {
+        $gte: date,
+        $lt: nextDate,
+      };
+    }
+
+    // Search on title or description
     if (search) {
       query.$or = [
         { title: { $regex: search, $options: "i" } },
@@ -52,6 +80,7 @@ exports.getAllTasks = async (req, res) => {
 
     res.status(200).json({ tasks });
   } catch (err) {
+    console.error("Fetch Tasks Error:", err);
     res.status(500).json({ message: "Error fetching tasks", error: err.message });
   }
 };
