@@ -354,15 +354,14 @@ export default function DashboardPage() {
         )}
 
         <div className="flex justify-end mb-6">
-          {profile?.role !== "user" ||
-            (profile?.role !== "" && (
+          {(profile?.role === "admin" ||  profile?.role === "manager") && (
               <button
                 onClick={handleCreateTask}
                 className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-3 rounded-lg shadow-md transition duration-200"
               >
                 + Create Task
               </button>
-            ))}
+            )}
         </div>
 
         <h1 className="text-4xl font-extrabold text-center text-gray-900 mb-10">
