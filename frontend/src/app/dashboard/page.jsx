@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import TaskFilters from "../tasks/TaskFilters";
 import API from "../../utils/api";
 import NotificationBar from "../../components/NotificationBar";
-
+export const dynamic = 'force-dynamic';
 const TaskCard = ({
   task,
   handleViewTask,
