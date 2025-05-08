@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import TaskFilters from "../tasks/TaskFilters";
 import API from "../../utils/api";
+import NotificationBar from "../../components/NotificationBar";
 
-const TaskCard = ({ task, handleViewTask, handleEditTask, handleDeleteTask }) => {
+const TaskCard = ({ task, handleViewTask, handleEditTask, handleDeleteTask, isAdmin }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const toggleExpand = () => setIsExpanded(!isExpanded);
 
@@ -77,12 +78,14 @@ const TaskCard = ({ task, handleViewTask, handleEditTask, handleDeleteTask }) =>
         >
           Edit
         </button>
+        {isAdmin && (
         <button
           onClick={() => handleDeleteTask(task._id)}
           className="text-red-600 border border-red-600 hover:bg-red-50 text-sm px-4 py-1.5 rounded-full transition"
         >
           Delete
         </button>
+        )}
       </div>
     </div>
   );
@@ -193,6 +196,7 @@ export default function DashboardPage() {
               handleEditTask={handleEditTask}
               handleDeleteTask={handleDeleteTask}
               handleViewTask={handleViewTask}
+              isAdmin={profile?.role === 'admin'}
             />
           ))}
         </div>
@@ -259,6 +263,8 @@ export default function DashboardPage() {
   const filteredAssignedTasks = filterTasks(data.assignedTasks);
   const filteredOverdueTasks = filterTasks(data.overdueTasks);
   return (
+    <>
+    <NotificationBar/>
     <div className="max-w mx-auto px-6 py-10 bg-gray-50">
       {showModal && selectedTask && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={closeModal}>
@@ -347,5 +353,6 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

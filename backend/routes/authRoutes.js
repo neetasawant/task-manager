@@ -16,13 +16,14 @@ router.get("/users", async (req, res) => {
   }
 });
 
-router.get("/profile", authMiddleware, async (req, res) => {
+router.get("/profile", authMiddleware(), async (req, res) => {
   try {
     console.log(req.user.id)
     const user = await User.findById(req.user.id); // Assuming the user ID is stored in the token
     res.json({
       name: user.name,
       email: user.email,
+      role: user.role,
       // Add other profile fields as necessary
     });
   } catch (err) {

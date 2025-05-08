@@ -11,5 +11,10 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.get('/', (req, res) => res.send('API is running'));
-
-module.exports = app;  // ✅ Must export the Express app
+app.post('/send-test-notification', (req, res) => {
+    const io = req.app.get('io');
+    console.log('Emitting test notification');
+    io.emit('notification', { message: 'This is a test notification' });
+    res.status(200).send('Test notification sent');
+  });
+module.exports = app;  
