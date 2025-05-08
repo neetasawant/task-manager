@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { use } from "react";
 import API from "../../../../utils/api";
-
+export const dynamic = 'force-dynamic';
 export default function TaskEditPage({ params: paramsPromise }) {
   const params = use(paramsPromise);
   const { taskId } = params;
